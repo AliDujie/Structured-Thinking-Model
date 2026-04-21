@@ -285,6 +285,8 @@ FULL_REPORT_TEMPLATE = """# {company} — 企业全维度研究报告
 ## 十、战略建议
 {strategic_recommendations}
 
+{ceo_decision_section}
+
 ---
 *本报告基于公开信息和分析框架生成，仅供参考。*
 """
