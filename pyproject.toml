@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "skill01"
+version = "2.0.0"
+description = "企业全维度调研工具包 - 像咨询公司资深总监一样系统化研究一家公司"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.setuptools.packages.find]
+include = ["skill01*"]
