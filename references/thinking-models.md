@@ -95,3 +95,9 @@ Plan（计划）、Do（执行）、Check（检查）、Act（改进）。循环
 ## 实操要点
 
 思维模型不是万能的，每个模型都有其适用范围和局限性。关键是根据问题的性质选择合适的工具，并将多个工具的分析结果进行交叉验证。工具的价值在于帮助结构化思考，而非替代深入的行业理解和商业判断。
+
+## 相关文档
+
+- [strategy-capability.md](strategy-capability.md) — 价值链分析和核心竞争力分析在两个文档中均有涉及，strategy-capability.md 将这些工具置于完整的战略分析语境中，与 SWOT、BCG 等工具联合使用
+- [loyalty-satisfaction.md](loyalty-satisfaction.md) — 本文的服务利润链和满意镜模型是客户忠诚度管理的理论基础，可与 loyalty-satisfaction.md 中 WAO、Satisfactor 等实操工具配合形成完整的客户管理方法体系
+- [business-frameworks.md](business-frameworks.md) — 本文详述的思维模型和决策工具在 business-frameworks.md 中有分类索引和速查入口，便于快速定位合适的工具

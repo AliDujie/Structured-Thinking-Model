@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from .base_analyzer import BaseAnalyzer
 from .config import (
     FIVE_FORCES, FIVE_FORCES_LABELS, INDUSTRY_LIFECYCLE_STAGES,
 )
@@ -8,7 +9,7 @@ from .templates import FIVE_FORCES_TEMPLATE
 from .utils import (
     calculate_weighted_total, format_score_bar,
     format_table, normalize_weights, score_to_level, validate_score,
-    validate_weight, load_knowledge, format_as_json,
+    validate_weight, format_as_json,
 )
 
 
@@ -95,8 +96,9 @@ class IndustryAnalysis:
         return result
 
 
-class IndustryAnalyzer:
+class IndustryAnalyzer(BaseAnalyzer):
     def __init__(self, company: str, industry: str):
+        super().__init__(company, industry, "industry_competition")
         self._analysis = IndustryAnalysis(company=company, industry=industry)
 
     def set_lifecycle_stage(self, stage: str) -> "IndustryAnalyzer":
@@ -171,6 +173,8 @@ class IndustryAnalyzer:
 
     def render_markdown(self) -> str:
         a = self._analysis
+        if not a.drivers and not a.competitors and not a.ksf_list:
+            return "## 行业竞争格局分析\n\n*尚未录入分析数据。请使用 `add_force_driver()` 等方法添加行业分析数据。*\n"
         forces_parts: List[str] = []
         for force in FIVE_FORCES:
             label = FIVE_FORCES_LABELS[force]
@@ -248,6 +252,3 @@ class IndustryAnalyzer:
             "lifecycle_insights": self.get_lifecycle_insights(),
         }
         return format_as_json(data)
-
-    def get_knowledge(self) -> str:
-        return load_knowledge("industry_competition")

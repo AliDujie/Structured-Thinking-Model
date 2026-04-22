@@ -67,3 +67,9 @@
 ## 实操要点
 
 行业分析不是一次性工作，需要持续跟踪和更新。特别关注行业中的结构性变化，如技术突破、政策变革、消费者行为转变等。分析时要区分行业层面的因素和企业层面的因素，避免混淆。竞争分析必须基于事实和数据，避免主观臆断。
+
+## 相关文档
+
+- [macro-environment.md](macro-environment.md) — 宏观环境（PESTEL）是行业竞争分析的外部背景，政策变革、技术突破等宏观因素直接改变五力模型中各种力量的强弱格局
+- [strategy-capability.md](strategy-capability.md) — 本文的行业竞争结论（五力分析、KSF、行业生命周期）作为企业 SWOT 分析中外部因素的核心输入
+- [strategy-matrices.md](strategy-matrices.md) — CPM 竞争态势矩阵在两个文档中均有涉及，本文偏重竞争结构和行业层面分析，strategy-matrices.md 偏重矩阵构建方法和战略选择指引

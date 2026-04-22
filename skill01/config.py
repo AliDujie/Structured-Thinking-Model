@@ -270,15 +270,6 @@ ICE_DIMENSIONS = ["接触点", "情境", "感觉", "区段", "地理", "时间"]
 
 ICE_PILLARS = ["整体设计", "品牌差异", "可检测的区别", "期望确定"]
 
-ICE_DATA_METHODS = [
-    "管理人员访谈",
-    "社会媒体倾听",
-    "深入的客户讨论",
-    "民族志式陪同观察",
-    "一线员工和经理会议",
-    "生物识别与眼动跟踪数据采集",
-]
-
 BRAND_LOYALTY_LEVELS = [
     {"level": 1, "label": "价格敏感型转换者", "description": "纯粹基于价格选择，无品牌忠诚"},
     {"level": 2, "label": "习惯性购买者", "description": "出于惯性购买，易被竞争者吸引"},
@@ -310,22 +301,6 @@ INDUSTRY_LIFECYCLE_STAGES: Dict[str, Dict[str, str]] = {
     },
 }
 
-SCORING_SCALE = {
-    1: "非常弱/非常不利",
-    2: "较弱/不利",
-    3: "中等/一般",
-    4: "较强/有利",
-    5: "非常强/非常有利",
-}
-
-WEIGHT_SCALE = {
-    "very_high": 0.15,
-    "high": 0.12,
-    "medium": 0.08,
-    "low": 0.05,
-    "very_low": 0.02,
-}
-
 RESEARCH_MODULES = [
     "macro_environment",
     "industry_competition",
@@ -343,19 +318,6 @@ RESEARCH_MODULE_LABELS: Dict[str, str] = {
     "loyalty_satisfaction": "客户满意度与忠诚度",
     "brand_value": "品牌与价值体系",
 }
-
-REPORT_CHAPTERS = [
-    "执行摘要",
-    "宏观环境",
-    "行业分析",
-    "企业概况",
-    "战略分析",
-    "消费者洞察",
-    "品牌诊断",
-    "客户体验与忠诚度",
-    "综合诊断",
-    "战略建议",
-]
 
 
 @dataclass

@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from .base_analyzer import BaseAnalyzer
 from .config import BRAND_LOYALTY_LEVELS
 from .templates import BRAND_TEMPLATE
 from .utils import (
     format_list, format_table, format_score_bar, validate_score,
-    load_knowledge, format_as_json,
+    format_as_json,
 )
 
 
@@ -59,10 +60,9 @@ class DifferentiationStrategy:
         return self.feasibility * self.impact
 
 
-class BrandAnalyzer:
+class BrandAnalyzer(BaseAnalyzer):
     def __init__(self, company: str, industry: str):
-        self._company = company
-        self._industry = industry
+        super().__init__(company, industry, "brand_value")
         self._awareness = BrandAwareness()
         self._associations: List[BrandAssociation] = []
         self._image_dims: List[BrandImageDimension] = []
@@ -144,6 +144,11 @@ class BrandAnalyzer:
         return "未知"
 
     def render_markdown(self) -> str:
+        if (self._awareness.top_of_mind == 0.0 and self._awareness.aided_awareness == 0.0
+                and self._awareness.recognition == 0.0
+                and not self._associations and not self._image_dims
+                and not self._competitors and not self._differentiations):
+            return "## 品牌价值分析\n\n*尚未录入分析数据。请使用 `set_awareness()` 等方法添加品牌分析数据。*\n"
         aw = self._awareness
         awareness_str = (
             f"- 无提示知名度 (Top of Mind): {aw.top_of_mind:.1f}%\n"
@@ -226,6 +231,3 @@ class BrandAnalyzer:
                                 for d in self._differentiations],
         }
         return format_as_json(data)
-
-    def get_knowledge(self) -> str:
-        return load_knowledge("brand_value")

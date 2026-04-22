@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from .base_analyzer import BaseAnalyzer
 from .config import VALUE_PYRAMID_LAYERS, ALL_VALUE_ELEMENTS, INDUSTRY_VALUE_PROFILES
 from .templates import VALUE_PYRAMID_TEMPLATE, STP_TEMPLATE, MARKETING_MIX_TEMPLATE
 from .utils import (
     format_list, format_table, format_score_bar, score_to_level,
-    validate_score, load_knowledge, format_as_json,
+    validate_score, format_as_json,
 )
 
 
@@ -49,10 +50,9 @@ class MarketingMixItem:
     recommendations: List[str] = field(default_factory=list)
 
 
-class ConsumerAnalyzer:
+class ConsumerAnalyzer(BaseAnalyzer):
     def __init__(self, company: str, industry: str):
-        self._company = company
-        self._industry = industry
+        super().__init__(company, industry, "consumer_insight")
         self._value_scores: List[ValueElementScore] = []
         self._segments: List[Segment] = []
         self._positioning = Positioning()
@@ -139,6 +139,8 @@ class ConsumerAnalyzer:
         return format_table(["要素", "评分", "竞争对手", "高分"], rows)
 
     def render_markdown(self) -> str:
+        if not self._value_scores and not self._segments and not self._marketing_mix:
+            return "## 消费者洞察分析\n\n*尚未录入分析数据。请使用 `add_value_score()` 等方法添加消费者分析数据。*\n"
         parts = [f"# 消费者洞察分析 — {self._company}\n"]
         if self._value_scores:
             benchmark = self.get_industry_benchmark()
@@ -223,6 +225,3 @@ class ConsumerAnalyzer:
                               for m in self._marketing_mix],
         }
         return format_as_json(data)
-
-    def get_knowledge(self) -> str:
-        return load_knowledge("consumer_insight")

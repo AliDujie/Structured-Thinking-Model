@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from .base_analyzer import BaseAnalyzer
 from .config import (
     SWOT_QUADRANTS, SWOT_LABELS, SWOT_STRATEGIES,
     BCG_QUADRANTS, GE_MATRIX_ZONES, GE_ATTRACTIVENESS_FACTORS,
@@ -10,7 +11,7 @@ from .config import (
 from .templates import SWOT_TEMPLATE, BCG_TEMPLATE, GE_TEMPLATE, VALUE_CHAIN_TEMPLATE, SEVEN_S_TEMPLATE
 from .utils import (
     format_list, format_table, format_score_bar, score_to_level,
-    validate_score, validate_weight, load_knowledge, format_as_json,
+    validate_score, validate_weight, format_as_json,
     calculate_weighted_total, normalize_weights,
 )
 
@@ -83,10 +84,9 @@ class SevenSElement:
     issues: List[str] = field(default_factory=list)
 
 
-class StrategyAnalyzer:
+class StrategyAnalyzer(BaseAnalyzer):
     def __init__(self, company: str, industry: str):
-        self._company = company
-        self._industry = industry
+        super().__init__(company, industry, "strategy_capability")
         self._swot_items: List[SWOTItem] = []
         self._swot_strategies: List[SWOTStrategy] = []
         self._business_units: List[BusinessUnit] = []
@@ -276,6 +276,9 @@ class StrategyAnalyzer:
         )
 
     def render_markdown(self) -> str:
+        if (not self._swot_items and not self._business_units and not self._ge_factors
+                and not self._value_chain and not self._seven_s):
+            return "## 企业战略与能力分析\n\n*尚未录入分析数据。请使用 `add_swot_item()` 等方法添加战略分析数据。*\n"
         parts = [f"# 企业战略与能力分析 — {self._company}\n"]
         if self._swot_items:
             parts.append(self._render_swot())
@@ -364,6 +367,3 @@ class StrategyAnalyzer:
             "ansoff_choice": self._ansoff_choice,
         }
         return format_as_json(data)
-
-    def get_knowledge(self) -> str:
-        return load_knowledge("strategy_capability")

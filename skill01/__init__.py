@@ -1,6 +1,7 @@
 """企业全维度调研工具包 — 像咨询公司资深总监一样研究一家公司。"""
 
 from .config import AnalysisConfig, RESEARCH_MODULES, RESEARCH_MODULE_LABELS
+from .base_analyzer import BaseAnalyzer
 from .utils import load_knowledge, load_all_knowledge, search_knowledge
 from .macro_analyzer import MacroAnalyzer, PESTFactor, PESTAnalysis
 from .industry_analyzer import IndustryAnalyzer, ForceDriver, CompetitorProfile, KSF
@@ -111,6 +112,7 @@ class CompanyResearchSkill:
 __all__ = [
     "CompanyResearchSkill",
     "AnalysisConfig",
+    "BaseAnalyzer",
     "MacroAnalyzer", "PESTFactor", "PESTAnalysis",
     "IndustryAnalyzer", "ForceDriver", "CompetitorProfile", "KSF",
     "StrategyAnalyzer", "SWOTItem", "SWOTStrategy", "BusinessUnit",

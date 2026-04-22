@@ -387,6 +387,168 @@ def test_interview_questions():
     print("✅ test_interview_questions passed")
 
 
+def test_empty_data_rendering():
+    """测试空数据时各模块的渲染行为"""
+    from skill01 import CompanyResearchSkill
+    skill = CompanyResearchSkill("空测试", "测试行业")
+
+    # 所有模块空数据时应返回提示而非误导性结论
+    macro_md = skill.macro.render_markdown()
+    assert "尚未录入" in macro_md or "暂无" in macro_md, "空数据应显示提示"
+    assert "非常不利" not in macro_md, "空数据不应输出误导性结论"
+
+    industry_md = skill.industry.render_markdown()
+    assert "尚未录入" in industry_md or "暂无" in industry_md
+
+    strategy_md = skill.strategy.render_markdown()
+    assert "尚未录入" in strategy_md or "暂无" in strategy_md
+
+    consumer_md = skill.consumer.render_markdown()
+    assert "尚未录入" in consumer_md or "暂无" in consumer_md
+
+    loyalty_md = skill.loyalty.render_markdown()
+    assert "尚未录入" in loyalty_md or "暂无" in loyalty_md
+
+    brand_md = skill.brand.render_markdown()
+    assert "尚未录入" in brand_md or "暂无" in brand_md
+
+    print("✅ test_empty_data_rendering passed")
+
+
+def test_wallet_share_boundaries():
+    """测试 WAO 钱包份额公式的边界情况"""
+    from skill01.utils import wallet_share_formula
+
+    # 正常情况
+    ws = wallet_share_formula(1, 5)
+    assert 0 < ws <= 1.0, f"排名第1的钱包份额应在(0,1]之间，得到 {ws}"
+
+    # rank > brand_count 应返回 0（而非负数）
+    ws = wallet_share_formula(6, 3)
+    assert ws == 0.0, f"rank > brand_count 应返回 0，得到 {ws}"
+
+    # rank == brand_count（最后一名）
+    ws = wallet_share_formula(5, 5)
+    assert ws >= 0.0, f"最后一名钱包份额不应为负，得到 {ws}"
+
+    # 无效输入
+    assert wallet_share_formula(0, 5) == 0.0
+    assert wallet_share_formula(-1, 5) == 0.0
+    assert wallet_share_formula(1, 0) == 0.0
+    assert wallet_share_formula(1, -1) == 0.0
+
+    print("✅ test_wallet_share_boundaries passed")
+
+
+def test_validate_score_errors():
+    """测试评分校验的错误处理"""
+    from skill01.utils import validate_score
+
+    # 正常范围内应返回原值
+    assert validate_score(3.0) == 3.0
+    assert validate_score(1.0) == 1.0
+    assert validate_score(5.0) == 5.0
+
+    # 越界应抛出 ValueError
+    try:
+        validate_score(0.0)
+        assert False, "应抛出 ValueError"
+    except ValueError:
+        pass
+
+    try:
+        validate_score(6.0)
+        assert False, "应抛出 ValueError"
+    except ValueError:
+        pass
+
+    try:
+        validate_score(50.0)
+        assert False, "应抛出 ValueError（防止误把百分比当评分）"
+    except ValueError:
+        pass
+
+    print("✅ test_validate_score_errors passed")
+
+
+def test_base_analyzer_contract():
+    """测试 BaseAnalyzer 基类契约"""
+    from skill01 import MacroAnalyzer, IndustryAnalyzer, StrategyAnalyzer
+    from skill01 import ConsumerAnalyzer, LoyaltyAnalyzer, BrandAnalyzer
+    from skill01.base_analyzer import BaseAnalyzer
+
+    # 所有 analyzer 应继承 BaseAnalyzer
+    for cls in [MacroAnalyzer, IndustryAnalyzer, StrategyAnalyzer,
+                ConsumerAnalyzer, LoyaltyAnalyzer, BrandAnalyzer]:
+        assert issubclass(cls, BaseAnalyzer), f"{cls.__name__} 应继承 BaseAnalyzer"
+
+    # 基类属性应正常工作
+    analyzer = MacroAnalyzer("测试公司", "测试行业")
+    assert analyzer.company == "测试公司"
+    assert analyzer.industry == "测试行业"
+
+    # get_knowledge 应返回非空字符串（前提是知识库文件存在）
+    knowledge = analyzer.get_knowledge()
+    assert isinstance(knowledge, str)
+
+    print("✅ test_base_analyzer_contract passed")
+
+
+def test_format_score_bar_boundaries():
+    """测试进度条渲染的边界情况"""
+    from skill01.utils import format_score_bar
+
+    # 正常情况
+    bar = format_score_bar(3.0)
+    assert "█" in bar and "░" in bar
+
+    # 超出范围应被截断显示而不崩溃
+    bar = format_score_bar(6.0, max_score=5)
+    assert "6.0/5" in bar  # 显示原始值但条形被截断
+
+    # 负数应被截断为 0
+    bar = format_score_bar(-1.0)
+    assert "-1.0/5" in bar
+
+    # max_score 为 0 不应崩溃
+    bar = format_score_bar(3.0, max_score=0)
+    assert "░" in bar
+
+    print("✅ test_format_score_bar_boundaries passed")
+
+
+def test_json_output_parseable():
+    """测试 JSON 输出可被正确解析"""
+    import json
+    from skill01 import CompanyResearchSkill
+
+    skill = CompanyResearchSkill("JSON测试", "测试行业")
+    skill.macro.add_factor("political", "测试因素", "测试", score=3.0, weight=0.1, trend="稳定")
+    skill.industry.add_force_driver("rivalry", "测试", "测试", score=3.0, weight=0.2)
+    skill.strategy.add_swot_item("strengths", "测试优势", importance=4)
+    skill.consumer.add_value_score("质量", score=4.0, importance=4.0)
+    skill.loyalty.add_brand_ranking("测试品牌", satisfaction_score=4.0, rank=1, brand_count=3)
+    skill.brand.set_awareness(top_of_mind=20.0, aided_awareness=60.0, recognition=80.0)
+
+    # 各模块 JSON 输出应可被解析
+    for name, analyzer in [
+        ("macro", skill.macro),
+        ("industry", skill.industry),
+        ("strategy", skill.strategy),
+        ("consumer", skill.consumer),
+        ("loyalty", skill.loyalty),
+        ("brand", skill.brand),
+    ]:
+        json_str = analyzer.render_json()
+        try:
+            data = json.loads(json_str)
+            assert isinstance(data, dict), f"{name} 的 JSON 输出应为字典"
+        except json.JSONDecodeError:
+            assert False, f"{name}.render_json() 输出无法被解析为 JSON"
+
+    print("✅ test_json_output_parseable passed")
+
+
 def run_all_tests():
     tests = [
         test_company_research_skill_init,
@@ -399,6 +561,12 @@ def run_all_tests():
         test_full_report_generation,
         test_knowledge_search,
         test_interview_questions,
+        test_empty_data_rendering,
+        test_wallet_share_boundaries,
+        test_validate_score_errors,
+        test_base_analyzer_contract,
+        test_format_score_bar_boundaries,
+        test_json_output_parseable,
     ]
     passed = 0
     failed = 0

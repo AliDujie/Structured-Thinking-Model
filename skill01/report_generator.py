@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Dict, List, Optional
 
-from .config import RESEARCH_MODULES, RESEARCH_MODULE_LABELS, REPORT_CHAPTERS
+from .config import RESEARCH_MODULES, RESEARCH_MODULE_LABELS
 from .templates import FULL_REPORT_TEMPLATE
 from .utils import format_as_json, load_knowledge, search_knowledge
 
@@ -63,6 +63,8 @@ class ReportGenerator:
         self._findings: List[DiagnosticFinding] = []
         self._executive_summary = ""
         self._company_overview = ""
+        self._resource_allocations: list = []
+        self._failure_scenarios: list = []
 
     def set_scope(self, scope: str) -> "ReportGenerator":
         self._scope = scope
@@ -147,8 +149,6 @@ class ReportGenerator:
     def add_resource_allocation(self, resource_type: str, area: str,
                                 current_pct: float, recommended_pct: float,
                                 rationale: str = "") -> "ReportGenerator":
-        if not hasattr(self, "_resource_allocations"):
-            self._resource_allocations: List[Dict] = []
         valid_types = ("资金", "人才", "时间")
         if resource_type not in valid_types:
             raise ValueError(f"resource_type 必须为 {valid_types} 之一")
@@ -162,8 +162,6 @@ class ReportGenerator:
     def add_failure_scenario(self, scenario: str, probability: str = "中",
                              impact: str = "高", trigger: str = "",
                              mitigation: str = "") -> "ReportGenerator":
-        if not hasattr(self, "_failure_scenarios"):
-            self._failure_scenarios: List[Dict] = []
         self._failure_scenarios.append({
             "scenario": scenario, "probability": probability,
             "impact": impact, "trigger": trigger, "mitigation": mitigation,

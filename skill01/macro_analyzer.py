@@ -2,14 +2,15 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Dict, List
 
+from .base_analyzer import BaseAnalyzer
 from .config import (
-    PEST_DIMENSIONS, PESTEL_DIMENSIONS, PEST_LABELS, SCORING_SCALE,
+    PEST_DIMENSIONS, PESTEL_DIMENSIONS, PEST_LABELS,
 )
 from .templates import PEST_ANALYSIS_TEMPLATE
 from .utils import (
     calculate_weighted_total, format_list, format_score_bar,
     format_table, normalize_weights, score_to_level, validate_score,
-    validate_weight, load_knowledge, format_as_json,
+    validate_weight, format_as_json,
 )
 
 
@@ -55,7 +56,10 @@ class PESTAnalysis:
         dim_factors = [f for f in self.factors if f.dimension == dimension]
         if not dim_factors:
             return 0.0
-        return sum(f.score * f.weight for f in dim_factors) / sum(f.weight for f in dim_factors)
+        total_weight = sum(f.weight for f in dim_factors)
+        if total_weight == 0:
+            return 0.0
+        return sum(f.score * f.weight for f in dim_factors) / total_weight
 
     def efe_score(self) -> float:
         if not self.factors:
@@ -78,8 +82,9 @@ class PESTAnalysis:
         return "外部环境非常不利，面临严峻挑战"
 
 
-class MacroAnalyzer:
+class MacroAnalyzer(BaseAnalyzer):
     def __init__(self, company: str, industry: str, mode: str = "pestel"):
+        super().__init__(company, industry, "macro_environment")
         self._analysis = PESTAnalysis(company=company, industry=industry, mode=mode)
 
     def add_factor(
@@ -142,6 +147,8 @@ class MacroAnalyzer:
         return implications
 
     def render_markdown(self) -> str:
+        if not self._analysis.factors:
+            return "## 宏观环境分析（PESTEL）\n\n*尚未录入分析数据。请使用 `add_factor()` 添加 PESTEL 因素。*\n"
         a = self._analysis
         sections: List[str] = []
         by_dim = a.factors_by_dimension()
@@ -194,6 +201,3 @@ class MacroAnalyzer:
             "implications": self.get_implications(),
         }
         return format_as_json(data)
-
-    def get_knowledge(self) -> str:
-        return load_knowledge("macro_environment")

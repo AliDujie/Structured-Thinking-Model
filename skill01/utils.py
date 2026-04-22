@@ -91,22 +91,12 @@ def format_table(headers: List[str], rows: List[List[str]]) -> str:
 
 
 def format_score_bar(score: float, max_score: int = 5, bar_length: int = 20) -> str:
-    filled = int((score / max_score) * bar_length)
+    if max_score <= 0:
+        return f"[{'░' * bar_length}] {score:.1f}/0"
+    clamped = max(0.0, min(float(score), float(max_score)))
+    filled = int((clamped / max_score) * bar_length)
     empty = bar_length - filled
     return f"[{'█' * filled}{'░' * empty}] {score:.1f}/{max_score}"
-
-
-def weighted_score(factors: List[Dict], weight_key: str = "weight", score_key: str = "score") -> float:
-    total = 0.0
-    total_weight = 0.0
-    for f in factors:
-        w = f.get(weight_key, 0.0)
-        s = f.get(score_key, 0.0)
-        total += w * s
-        total_weight += w
-    if total_weight == 0:
-        return 0.0
-    return total / total_weight * (total_weight / total_weight)
 
 
 def calculate_weighted_total(factors: List[Dict], weight_key: str = "weight", score_key: str = "score") -> float:
@@ -136,10 +126,8 @@ def score_to_level(score: float, max_score: int = 5) -> str:
 
 
 def validate_score(score: float, min_val: float = 1.0, max_val: float = 5.0) -> float:
-    if score < min_val:
-        return min_val
-    if score > max_val:
-        return max_val
+    if score < min_val or score > max_val:
+        raise ValueError(f"评分 {score} 超出有效范围 [{min_val}, {max_val}]")
     return score
 
 
@@ -153,5 +141,7 @@ def validate_weight(weight: float) -> float:
 
 def wallet_share_formula(rank: int, brand_count: int) -> float:
     if brand_count <= 0 or rank <= 0:
+        return 0.0
+    if rank > brand_count:
         return 0.0
     return (1 - rank / (brand_count + 1)) * (2 / brand_count)

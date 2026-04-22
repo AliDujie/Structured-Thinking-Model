@@ -1,11 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
-from .config import LOYALTY_CUSTOMER_SEGMENTS, ICE_DIMENSIONS, ICE_PILLARS, ICE_DATA_METHODS
+from .base_analyzer import BaseAnalyzer
+from .config import LOYALTY_CUSTOMER_SEGMENTS, ICE_DIMENSIONS, ICE_PILLARS
 from .templates import WAO_TEMPLATE, LOYALTY_TEMPLATE, ICE_TEMPLATE
 from .utils import (
     format_list, format_table, format_score_bar, validate_score,
-    wallet_share_formula, load_knowledge, format_as_json,
+    wallet_share_formula, format_as_json,
 )
 
 
@@ -64,10 +65,9 @@ class ICEAssessment:
     improvement_actions: List[str] = field(default_factory=list)
 
 
-class LoyaltyAnalyzer:
+class LoyaltyAnalyzer(BaseAnalyzer):
     def __init__(self, company: str, industry: str):
-        self._company = company
-        self._industry = industry
+        super().__init__(company, industry, "loyalty_satisfaction")
         self._brand_rankings: List[BrandRanking] = []
         self._satisfaction_drivers: List[SatisfactionDriver] = []
         self._loyalty_segments: List[LoyaltySegment] = []
@@ -147,6 +147,9 @@ class LoyaltyAnalyzer:
         return sorted_drivers[:top_n]
 
     def render_markdown(self) -> str:
+        if (not self._brand_rankings and not self._satisfaction_drivers
+                and not self._loyalty_segments and not self._ice_assessments):
+            return "## 客户满意度与忠诚度分析\n\n*尚未录入分析数据。请使用 `add_brand_ranking()` 等方法添加忠诚度分析数据。*\n"
         parts = [f"# 客户满意度与忠诚度分析 — {self._company}\n"]
         if self._brand_rankings:
             rows = []
@@ -258,6 +261,3 @@ class LoyaltyAnalyzer:
             ],
         }
         return format_as_json(data)
-
-    def get_knowledge(self) -> str:
-        return load_knowledge("loyalty_satisfaction")
